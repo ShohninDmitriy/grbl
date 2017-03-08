@@ -149,14 +149,20 @@ void spindle_stop()
     uint8_t spindle_compute_pwm_value(float rpm) // 328p PWM register is 8-bit.
     {
       uint8_t pwm_value;
-      rpm *= (0.010*sys.spindle_speed_ovr); // Scale by spindle speed override value.
+      #ifndef SPINDLE_IS_SERVO
+        rpm *= (0.010*sys.spindle_speed_ovr); // Scale by spindle speed override value.
+      #endif
       // Calculate PWM register value based on rpm max/min settings and programmed rpm.
       if ((settings.rpm_min >= settings.rpm_max) || (rpm >= RPM_MAX)) {
         rpm = RPM_MAX;
         pwm_value = SPINDLE_PWM_MAX_VALUE;
       } else if (rpm <= RPM_MIN) {
         if (rpm == 0.0) { // S0 disables spindle
-          pwm_value = SPINDLE_PWM_OFF_VALUE;
+          #ifdef SPINDLE_IS_SERVO
+            pwm_value = SPINDLE_PWM_MIN_VALUE;
+          #else
+            pwm_value = SPINDLE_PWM_OFF_VALUE;
+          #endif
         } else {
           rpm = RPM_MIN;
           pwm_value = SPINDLE_PWM_MIN_VALUE;
@@ -232,10 +238,16 @@ void spindle_stop()
 
   if (state == SPINDLE_DISABLE) { // Halt or set spindle direction and rpm.
   
-    #ifdef VARIABLE_SPINDLE
-      sys.spindle_speed = 0.0;
+    #ifdef SPINDLE_IS_SERVO
+      // For servo send min. PWM instead of deactivate PWM
+      sys.spindle_speed = SPINDLE_PWM_MIN_VALUE;
+      spindle_set_speed(spindle_compute_pwm_value(SPINDLE_PWM_MIN_VALUE));
+    #else
+      #ifdef VARIABLE_SPINDLE
+        sys.spindle_speed = 0.0;
+      #endif
+      spindle_stop();
     #endif
-    spindle_stop();
   
   } else {
     
