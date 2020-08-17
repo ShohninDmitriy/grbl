@@ -67,7 +67,7 @@
   #else
     #define Z_LIMIT_BIT    3  // Uno Digital Pin 11
   #endif
-  #if !defined(ENABLE_DUAL_AXIS)
+  #ifndef ENABLE_DUAL_AXIS
     #define LIMIT_MASK     ((1<<X_LIMIT_BIT)|(1<<Y_LIMIT_BIT)|(1<<Z_LIMIT_BIT)) // All limit bits
   #endif
   #define LIMIT_INT        PCIE0  // Pin change interrupt enable pin
@@ -96,7 +96,7 @@
   #define PROBE_BIT       5  // Uno Analog Pin 5
   #define PROBE_MASK      (1<<PROBE_BIT)
 
-  #if !defined(ENABLE_DUAL_AXIS)
+  #ifndef ENABLE_DUAL_AXIS
 
     // Define flood and mist coolant enable output pins.
     #define COOLANT_FLOOD_DDR   DDRC

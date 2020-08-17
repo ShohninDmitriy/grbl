@@ -31,9 +31,24 @@
 DEVICE     ?= atmega328p
 CLOCK      = 16000000
 PROGRAMMER ?= -c avrisp2 -P usb
-SOURCE    = main.c motion_control.c gcode.c spindle_control.c coolant_control.c serial.c \
-             protocol.c stepper.c eeprom.c settings.c planner.c nuts_bolts.c limits.c jog.c\
-             print.c probe.c report.c system.c
+SOURCE    = main.c \
+			motion_control.c \
+			gcode.c \
+			spindle_control.c \
+			coolant_control.c \
+			serial.c \
+			protocol.c \
+			stepper.c \
+			eeprom.c \
+			settings.c \
+			planner.c \
+			nuts_bolts.c \
+			limits.c \
+			jog.c \
+			print.c \
+			probe.c \
+			report.c \
+			system.c
 BUILDDIR = build
 SOURCEDIR = grbl
 # FUSES      = -U hfuse:w:0xd9:m -U lfuse:w:0x24:m
@@ -52,8 +67,10 @@ COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE) -I. -ffunction-sect
 
 OBJECTS = $(addprefix $(BUILDDIR)/,$(notdir $(SOURCE:.c=.o)))
 
+.PHONY: all flash fuse install load clean
+
 # symbolic targets:
-all:	grbl.hex
+all: grbl.hex
 
 $(BUILDDIR)/%.o: $(SOURCEDIR)/%.c
 	$(COMPILE) -MMD -MP -c $< -o $@
@@ -78,29 +95,29 @@ fuse:
 install: flash fuse
 
 # if you use a bootloader, change the command below appropriately:
-load: all
-	bootloadHID grbl.hex
+load: grbl.hex
+	bootloadHID $<
 
 clean:
 	rm -f grbl.hex $(BUILDDIR)/*.o $(BUILDDIR)/*.d $(BUILDDIR)/*.elf
 
 # file targets:
 $(BUILDDIR)/main.elf: $(OBJECTS)
-	$(COMPILE) -o $(BUILDDIR)/main.elf $(OBJECTS) -lm -Wl,--gc-sections
+	$(COMPILE) -o $@ $^ -lm -Wl,--gc-sections
 
 grbl.hex: $(BUILDDIR)/main.elf
 	rm -f grbl.hex
-	avr-objcopy -j .text -j .data -O ihex $(BUILDDIR)/main.elf grbl.hex
-	avr-size --format=berkeley $(BUILDDIR)/main.elf
+	avr-objcopy -j .text -j .data -O ihex $< $@
+	avr-size --format=berkeley $@
 # If you have an EEPROM section, you must also create a hex file for the
 # EEPROM and add it to the "flash" target.
 
 # Targets for code debugging and analysis:
-disasm:	main.elf
-	avr-objdump -d $(BUILDDIR)/main.elf
+disasm: $(BUILDDIR)/main.elf
+	avr-objdump -d $^
 
-cpp:
-	$(COMPILE) -E $(SOURCEDIR)/main.c
+cpp: $(SOURCEDIR)/main.c
+	$(COMPILE) -E $^
 
 # include generated header dependencies
 -include $(BUILDDIR)/$(OBJECTS:.o=.d)
