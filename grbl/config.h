@@ -128,6 +128,9 @@
 // define to force Grbl to always set the machine origin at the homed location despite switch orientation.
 // #define HOMING_FORCE_SET_ORIGIN // Uncomment to enable.
 
+// Uncomment this define to force Grbl to always set the machine origin at bottom left.
+// #define HOMING_FORCE_POSITIVE_SPACE // Uncomment to enable.
+
 // Number of blocks Grbl executes upon startup. These blocks are stored in EEPROM, where the size
 // and addresses are defined in settings.h. With the current settings, up to 2 startup blocks may
 // be stored and executed in order. These startup blocks would typically be used to set the g-code
@@ -366,6 +369,11 @@
 // re-enable when spindle speed is greater than zero. This option does that.
 // NOTE: Requires USE_SPINDLE_DIR_AS_ENABLE_PIN to be enabled.
 // #define SPINDLE_ENABLE_OFF_WITH_ZERO_SPEED // Default disabled. Uncomment to enable.
+
+// If you use a servo instead of a spindle (like on EggBot or pen plotter), you need to uncomment this option.
+// This will set the PWM frequency to 61Hz and limit the PWM range to 0.5 - 2.5ms, as used by most servos.
+// See cpu_map.h, if you need to change the PWM range.
+#define SPINDLE_IS_SERVO // Default disabled. Uncomment to enable.
 
 // With this enabled, Grbl sends back an echo of the line it has received, which has been pre-parsed (spaces
 // removed, capitalized letters, no comments) and is to be immediately executed by Grbl. Echoes will not be
